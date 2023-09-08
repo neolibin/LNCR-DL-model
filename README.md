@@ -16,7 +16,7 @@ Then both the optimal CNN architecture for each histological staining and the mo
 
 Ensemble models of multi-magnification or multi-stain were obtained based on averaging the predicted value of each single-magnification model or single-stain model, respectively. 
 
-### Test
+### Model Test
 
 Model test script is in [ModelTest.py] file. Trained models were tested on the independent external test cohort.
 
