@@ -40,30 +40,20 @@ def get_parser():
     parser.add_argument('--seed', default=99, type=int, help='seed')
     parser.add_argument('--data_set', default='HE', type=str)
     parser.add_argument('--mag', default='10', type=str)
-    parser.add_argument('--lr', default=1e-4, type=float, help='initial learning rate (default: 0.05)')
-    parser.add_argument('--momentum', default=0.95, type=float)
+    parser.add_argument('--lr', default=5e-4, type=float, help='initial learning rate (default: 0.05)')
+    parser.add_argument('--momentum', default=0.90, type=float)
     parser.add_argument('--weight_decay', default=5e-4, type=float)
     parser.add_argument('--lrdrop', default=150, type=int, help='multiply LR by 0.1 every (default: 150 epochs)')
-    parser.add_argument('--batchsize', default=64, type=int)
+    parser.add_argument('--batchsize', default=32, type=int)
     parser.add_argument('--device', default='0,1,2,3', type=str)
-    parser.add_argument('--comment', default='MIL-default', type=str)
-    parser.add_argument('--model', default=18, type=str)
+    parser.add_argument('--comment', default='LNCR', type=str)
+    parser.add_argument('--mod', default='inceptionV3', type=str)
     parser.add_argument('--pretrain', action='store_true')
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--init_method', type=str)
     return parser.parse_args()
 
 args = get_parser()
-
-
-train_transform = transforms.Compose([
-            transforms.RandomCrop(384),
-            transforms.Resize(299),
-        ])
-val_transform = transforms.Compose([
-            transforms.CenterCrop(384),
-            transforms.Resize(299),
-        ])
 
 
 class PedDataset(Dataset):
@@ -296,6 +286,21 @@ class Attention_Gated(nn.Module):
                 print('FLOPS:', flops)
                 print('PARAMS:', params)
             nn.init.xavier_normal_(self.feature_extractor.classifier.weight)
+        elif model == 'vit':
+            import timm
+            self.L = 128
+            vit_model = timm.create_model('vit_base_patch16_384', pretrained=False)
+            pretrained_model_path = '/group_homes/HCC_surv/home/share/vit_base_patch16_384_augreg_in21k_ft_in1k.bin'
+            if pretrained_model_path is not None and os.path.isfile(pretrained_model_path):
+                print("loading pretrain weights from :", pretrained_model_path)
+                checkpoint = torch.load(pretrained_model_path)
+                vit_model.load_state_dict(checkpoint, strict=False)  
+            else:
+                print("no such file, the model will train from scratch.")  
+            self.feature_extractor = nn.Sequential(
+                                        vit_model,
+                                        nn.Linear(1000, 128)
+                                    )
         else:
             self.feature_extractor = torchvision.models.inception_v3(pretrained=True, aux_logits=False)
             self.feature_extractor.fc = nn.Linear(2048, self.L)
@@ -573,6 +578,22 @@ if __name__ == '__main__':
     )
     name = args.comment
     now = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S')
+
+    train_transform = transforms.Compose([
+            transforms.RandomCrop(384),
+            transforms.Resize(299),
+            ])
+    val_transform = transforms.Compose([
+            transforms.CenterCrop(384),
+            transforms.Resize(299),
+            ])
+    if mod=='vit':
+        train_transform = transforms.Compose([
+            transforms.RandomCrop(384)
+            ])
+        test_transform = transforms.Compose([
+            transforms.CenterCrop(384)
+            ])
     
     with open(f'./Labels/Model.json3') as f:
     data_map = json.load(f)
@@ -622,8 +643,11 @@ if __name__ == '__main__':
         Attention_Gated(mod, args.pretrain)
     ).to(device)
 
-    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
-
+    if mod=='vit': 
+        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    else:
+        optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        
     model, optimizer = amp.initialize(model, optimizer, 
                                       opt_level="O0",
                                       keep_batchnorm_fp32=None)
