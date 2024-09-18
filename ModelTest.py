@@ -36,6 +36,7 @@ from thop import profile
 def get_parser():
     parser = argparse.ArgumentParser(description='PyTorch Implementation of multiple Instance learning')
     parser.add_argument('--testpath', default='None', type=str)
+    parser.add_argument('--model', default='inceptionV3', type=str)
     parser.add_argument('--modelpath', default='None', type=str)
     parser.add_argument('--data_set', default='HE', type=str)
     parser.add_argument('--mag', default='10', type=str)
@@ -45,12 +46,6 @@ def get_parser():
     return parser.parse_args()
 
 args = get_parser()
-
-# # ###
-test_transform = transforms.Compose([
-            transforms.CenterCrop(384),
-            transforms.Resize(299),
-        ])
 
 
 class PedDataset(Dataset):
@@ -264,6 +259,23 @@ class Attention_Gated(nn.Module):
                 print('FLOPS:', flops)
                 print('PARAMS:', params)
             nn.init.xavier_normal_(self.feature_extractor.classifier.weight)
+        elif model == 'vit':
+            import timm
+            self.L = 128
+            vit_model = timm.create_model('vit_base_patch16_384', pretrained=False)
+            pretrained_model_path = '/group_homes/HCC_surv/home/share/vit_base_patch16_384_augreg_in21k_ft_in1k.bin'
+            if pretrained_model_path is not None and os.path.isfile(pretrained_model_path):
+                print("#########start#########")
+                print("loading pretrain weights from :", pretrained_model_path)
+                checkpoint = torch.load(pretrained_model_path)
+                vit_model.load_state_dict(checkpoint, strict=False)  
+            else:
+                print("#########start#########")
+                print("no such file, the model will train from scratch.")  
+            self.feature_extractor = nn.Sequential(
+                                        vit_model,
+                                        nn.Linear(1000, 128)
+                                    )
         else:
             self.feature_extractor = torchvision.models.inception_v3(pretrained=True, aux_logits=False)
             self.feature_extractor.fc = nn.Linear(2048, self.L)
@@ -424,6 +436,14 @@ if __name__ == '__main__':
         init_method=args.init_method
     )
             
+    test_transform = transforms.Compose([
+            transforms.CenterCrop(384),
+            transforms.Resize(299),
+            ])
+    if mod=='vit':
+        test_transform = transforms.Compose([
+            transforms.CenterCrop(384)
+            ])
     
     with open(f'./Labels/test.json3') as f:
         test_data_map = json.load(f)
