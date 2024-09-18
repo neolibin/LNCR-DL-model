@@ -166,12 +166,22 @@ def fast_collate(batch, memory_format):
 
 
 class data_prefetcher():
-    def __init__(self, loader, dataset='train'):
+    def __init__(self, loader, data_set='HE'):
         self.loader = iter(loader)
         self.stream = torch.cuda.Stream()
         
-        self.mean = torch.tensor([0.6522 * 255, 0.3254 * 255, 0.6157 * 255]).cuda().view(1,3,1,1)
-        self.std = torch.tensor([0.2044 * 255, 0.2466 * 255, 0.1815 * 255]).cuda().view(1,3,1,1)
+        if data_set=='HE':
+            self.mean = torch.tensor([0.7441 * 255, 0.5278 * 255, 0.7350 * 255]).cuda().view(1,3,1,1)
+            self.std = torch.tensor([0.1951 * 255, 0.2996 * 255, 0.2122 * 255]).cuda().view(1,3,1,1)
+        if data_set=='MASSON':
+            self.mean = torch.tensor([0.6599 * 255, 0.5043 * 255, 0.6319 * 255]).cuda().view(1,3,1,1)
+            self.std = torch.tensor([0.2691 * 255, 0.3343 * 255, 0.2675 * 255]).cuda().view(1,3,1,1)
+        if data_set=='PAS':
+            self.mean = torch.tensor([0.8474 * 255, 0.7170 * 255, 0.8241 * 255]).cuda().view(1,3,1,1)
+            self.std = torch.tensor([0.1404 * 255, 0.2086 * 255, 0.1580 * 255]).cuda().view(1,3,1,1)
+        if data_set=='PASM':
+            self.mean = torch.tensor([0.4559 * 255, 0.3877 * 255, 0.4707 * 255]).cuda().view(1,3,1,1)
+            self.std = torch.tensor([0.3390 * 255, 0.3588 * 255, 0.3665 * 255]).cuda().view(1,3,1,1)
         self.preload()
 
     def preload(self):
