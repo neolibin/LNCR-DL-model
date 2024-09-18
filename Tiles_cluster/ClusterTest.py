@@ -145,15 +145,15 @@ def run(eval_dataloader, device, dim_redu, random_state, P, data_set, dim, mod):
 
 if __name__ == '__main__':
     
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3,4,5,6'
-    data_set = 'HE_20_6'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3,4,5,6,7'
+    data_set = 'HE_10_6'
     dim = 6
     dim_redu = 'tsne'
     np.random.seed(999)
     random.seed(999)
     random_state=99999999   
 
-    d = ClusterDataset(f'./Cluster_patches_copy_0821/HE_20_top_patches', data_set, training=False)
+    d = ClusterDataset(f'./Cluster_patches_copy_0821/HE_10_top_patches', data_set, training=False)
     eval_dataloader = DataLoader(d, batch_size=128, 
                                  num_workers=16, 
                                  pin_memory=True, 
