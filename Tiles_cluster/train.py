@@ -24,15 +24,15 @@ import torchvision
 def _main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--dataset_type', type=str, required=True,
+    parser.add_argument('--dataset_type', type='HE', required=True,
                         help='type of the dataset')
     parser.add_argument('--dataset_path', type=str, required=True, help='path to the dataset')
 
-    parser.add_argument('--img_type', type=str, default='grayscale', choices=['rgb', 'grayscale', 'sobel'],
+    parser.add_argument('--img_type', type=str, default='rgb', choices=['rgb', 'grayscale', 'sobel'],
                         help='type of the image')
 
     parser.add_argument('--dim_zs', type=int, default=50, help='dimension of zs')
-    parser.add_argument('--dim_zc', type=int, default=10, help='dimension of zc')
+    parser.add_argument('--dim_zc', type=int, default=6, help='dimension of zc')
     parser.add_argument('--zs_std', type=float, default=0.1,
                         help='standard deviation of the prior gaussian distribution for zs')
 
