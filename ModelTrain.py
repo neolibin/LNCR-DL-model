@@ -502,7 +502,7 @@ def eval_model(args, dataloader, model, device, optimizer, epoch, Writer, phase,
     all_values = []
     eval_loss = 0
     
-    prefetcher = data_prefetcher(dataloader)
+    prefetcher = data_prefetcher(dataloader, data_set)
     patches, label = prefetcher.next()
     index = 0
     while patches is not None:
