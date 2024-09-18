@@ -19,8 +19,8 @@ Ensemble models of multi-magnification for signle-stain were obtained based on a
 Model test script is in [ModelTest.py] file. Trained models were tested on the independent external test cohort.
 
 ### Tiles cluster & Model visualization prediction
-Tile ckuster script is in [Cluster.py] file. 
-To identify the key renal histopathological features that contribute the most to the model prediction, we performed unsupervised clustering of tiles using Deep Clustering with Category-Style representation (DCCS) and t-distributed stochastic neighbor embedding (t-SNE) algorithms. DCCS was employed to perform unsupervised clustering on the influential tiles, which it can aggregate the tiles into different clusters according to their features. Further, t-SNE was used for dimensionality reduction and cluster projection. 
+Tile cluster script is in Tile_cluster file. 
+To identify the key renal histopathological features that contribute the most to the model prediction, we performed unsupervised clustering of tiles using Deep Clustering with Category-Style representation (DCCS) and t-distributed stochastic neighbor embedding (t-SNE) algorithms. DCCS was employed to perform unsupervised clustering on the influential tiles, which it can aggregate the tiles into different clusters according to their features [ClusterTrain.py]. Further, t-SNE was used for dimensionality reduction and cluster projection [ClusterTest.py]. 
 
 Model visualization prediction script is in [gradCam.py] file. 
 To identify the renal histopathological features related to induction treatment response, we applied gradient-weighted class activation mapping (gradCAM) to visualize the most predictive tiles.
